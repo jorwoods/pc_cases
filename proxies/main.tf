@@ -3,12 +3,12 @@ provider "aws" {
 }
 
 data "aws_vpc" "this" {
-    default = true
+  default = true
 }
 
 data "aws_subnets" "this" {
   filter {
-    name = "vpc-id"
+    name   = "vpc-id"
     values = [data.aws_vpc.this.id]
   }
 }
@@ -34,32 +34,32 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "tls_private_key" "this" {
-  algorithm   = "RSA"
+  algorithm = "RSA"
 }
 
 resource "aws_key_pair" "this" {
-    key_name = "deploy-key"
-    public_key = tls_private_key.this.public_key_openssh
+  key_name   = "deploy-key"
+  public_key = tls_private_key.this.public_key_openssh
 }
 
 resource "aws_security_group" "this" {
-    name = "allow_inbound_local"
-    description = "Allow inbound traffic from local"
-    vpc_id = data.aws_vpc.this.id
+  name        = "allow_inbound_local"
+  description = "Allow inbound traffic from local"
+  vpc_id      = data.aws_vpc.this.id
 
-    ingress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
-    }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+  }
 
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 # resource "aws_spot_instance_request" "cheap_worker" {
@@ -76,7 +76,7 @@ resource "aws_security_group" "this" {
 # }
 
 # resource "aws_instance" "proxy" {
-  
+
 #   ami           = 
 #   instance_type = "t4.micro"
 #   key_name = aws_key_pair.this.key_name
@@ -88,7 +88,7 @@ resource "aws_security_group" "this" {
 # }
 
 module "ec2_proxy" {
-    count = 10
+  count   = 10
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
@@ -98,7 +98,7 @@ module "ec2_proxy" {
   spot_price           = "0.01"
   spot_type            = "one-time"
   # spot_block_duration_minutes = 60
-  spot_launch_group = "scrapy_proxy"
+  spot_launch_group         = "scrapy_proxy"
   spot_wait_for_fulfillment = true
 
   ami                    = data.aws_ami.ubuntu.id
@@ -106,11 +106,11 @@ module "ec2_proxy" {
   key_name               = aws_key_pair.this.key_name
   monitoring             = true
   vpc_security_group_ids = [aws_security_group.this.id]
-  subnet_id              = data.aws_subnets.this.ids[0]
-  user_data = file("${path.module}/tiny_proxy_user_data.sh")
+  subnet_id              = data.aws_subnets.this.ids[count.index % length(data.aws_subnets.this.ids)]
+  user_data              = file("${path.module}/tiny_proxy_user_data.sh")
 
   tags = {
-    Name = "ScrapyProxy"  
+    Name        = "ScrapyProxy"
     Terraform   = "true"
     Environment = "dev"
   }
