@@ -44,7 +44,7 @@ class NeweggSpider(scrapy.Spider):
                 continue
             order = dimension_order.findall(key)
             if order:
-                dim_order = [hwd[i]]
+                dim_order = [hwd[i] for i in order[0]]
             else:
                 dim_order = ['height', 'width', 'depth']
 
@@ -58,7 +58,7 @@ class NeweggSpider(scrapy.Spider):
                 (?P<{2}>[\d\.]+)
                 \s*(?P<toss3>\([LWHD]\))?
                 \s*"?\s*
-                (?P<unit>mm|in)?
+                (?P<unit>mm|in)?|$
             """.format(*dim_order), re.VERBOSE | re.IGNORECASE)
             parsed = regex.search(data[key]).groupdict()
             del parsed['toss1'], parsed['toss2'], parsed['toss3']

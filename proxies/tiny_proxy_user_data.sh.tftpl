@@ -1,0 +1,8 @@
+#!/bin/bash -xe
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+sudo apt update
+sudo apt upgrade --yes
+sudo apt install tinyproxy --yes
+sudo sed -i "s/Allow 127.0.0.1/Allow ${ip}/" /etc/tinyproxy/tinyproxy.conf
+sudo /etc/init.d/tinyproxy restart

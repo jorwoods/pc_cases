@@ -62,33 +62,9 @@ resource "aws_security_group" "this" {
   }
 }
 
-# resource "aws_spot_instance_request" "cheap_worker" {
-#   ami           = data.aws_ami.ubuntu.id
-#   spot_price    = "0.01"
-#   instance_type = "t4.micro"
-#   launch_group = "scrapy_proxy"
-#   block_duration_minutes = 60
-#   wait_for_fulfillment = true
-
-#   tags = {
-#     Name = "ScrapyProxy"
-#   }
-# }
-
-# resource "aws_instance" "proxy" {
-
-#   ami           = 
-#   instance_type = "t4.micro"
-#   key_name = aws_key_pair.this.key_name
-#   user_data = file("${path.module}/tiny_proxy_user_data.sh")
-
-#   tags = {
-#     Name = "ScrapyProxy"
-#   }
-# }
 
 module "ec2_proxy" {
-  count   = 10
+  count   = 12
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
@@ -107,7 +83,7 @@ module "ec2_proxy" {
   monitoring             = true
   vpc_security_group_ids = [aws_security_group.this.id]
   subnet_id              = data.aws_subnets.this.ids[count.index % length(data.aws_subnets.this.ids)]
-  user_data              = file("${path.module}/tiny_proxy_user_data.sh")
+  user_data              = templatefile("${path.module}/tiny_proxy_user_data.sh.tftpl", {ip = chomp(data.http.myip.body)})
 
   tags = {
     Name        = "ScrapyProxy"

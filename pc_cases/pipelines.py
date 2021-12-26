@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import re
+import copy
 
 measurement = re.compile(r"(?P<size>[\d\.]+)\s*(?P<unit>in|mm)?|$")
 
@@ -18,7 +19,8 @@ def cast_float(x):
 
 class PcCasesPipeline:
     def process_item(self, item, spider):
-        for key in item.keys():
+        keys = copy.deepcopy(set(item.keys()))
+        for key in keys:
             if not any(x in key for x in ('gpu', 'video')):
                 continue
             gpu_info = measurement.search(item[key].lower()).groupdict()
