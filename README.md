@@ -11,7 +11,7 @@ and then look through the resulting URLs.
 
 ```sh
 
-pipenv run scrapy crawl newegg -O newegg_cases.json
-pipenv run python process_newegg_cases.py
+docker run -it $(docker build -q .)
+/bin/bash run.sh
 
 ```
