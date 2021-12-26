@@ -50,28 +50,24 @@ class NeweggSpider(scrapy.Spider):
 
             regex = re.compile(r"""
                 (?P<{0}>[\d\.]+)
-                \s*(?P<toss1>\([LWHD]\))?
-                \s*"?\s*x\s*
+                \s*(\([LWHD]\))?
+                \s*("|mm)?\s*x\s*
                 (?P<{1}>[\d\.]+)
-                \s*(?P<toss2>\([LWHD]\))?
-                \s*"?\s*x\s*
+                \s*(\([LWHD]\))?
+                \s*("|mm)?\s*x\s*
                 (?P<{2}>[\d\.]+)
-                \s*(?P<toss3>\([LWHD]\))?
-                \s*"?\s*
-                (?P<unit>mm|in)?|$
+                \s*(\([LWHD]\))?
+                \s*
+                (?P<unit>mm|in|")?|$
             """.format(*dim_order), re.VERBOSE | re.IGNORECASE)
             parsed = regex.search(data[key]).groupdict()
-            del parsed['toss1'], parsed['toss2'], parsed['toss3']
             if any((v is not None for v in parsed.values())):
                 data['height'] = cast_float(parsed['height'])
                 data['width'] = cast_float(parsed['width'])
                 data['depth'] = cast_float(parsed['depth'])
                 data['units'] = parsed['unit']
+                if data['units'] == '"':
+                    data['units'] == 'in'
                 break
-
-        for key in data.keys():
-            if not any(x in key for x in ('gpu', 'video')):
-                continue
-            
 
         yield data
