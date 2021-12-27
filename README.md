@@ -9,9 +9,11 @@ and then look through the resulting URLs.
 
 # How to run
 
+Replace the `...` with access key and secret key for your AWS keys.
+
 ```sh
 
-docker run -it $(docker build -q .)
+docker run -e "AWS_ACCESS_KEY_ID=..." -e "AWS_SECRET_ACCESS_KEY=..." -it $(docker build -q .)
 /bin/bash run.sh
 
 ```
