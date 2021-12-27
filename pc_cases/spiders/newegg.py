@@ -50,18 +50,24 @@ class NeweggSpider(scrapy.Spider):
 
             regex = re.compile(r"""
                 (?P<{0}>[\d\.]+)
-                \s*(\([LWHD]\))?
-                \s*("|mm)?\s*x\s*
+                \s*("|mm)?\s*([x\*])\s*
+                \s*(?P<dim_label_0>\([LWHD]\))?
                 (?P<{1}>[\d\.]+)
-                \s*(\([LWHD]\))?
-                \s*("|mm)?\s*x\s*
+                \s*("|mm)?\s*([x\*])\s*
+                \s*(?P<dim_label_1>\([LWHD]\))?
                 (?P<{2}>[\d\.]+)
-                \s*(\([LWHD]\))?
+                \s*(?P<dim_label_2>\([LWHD]\))?
                 \s*
-                (?P<unit>mm|in|")?|$
+                (?P<unit>mm|in|")?
+                |$ # Regex capture no matches so groupdict doesn't error.
             """.format(*dim_order), re.VERBOSE | re.IGNORECASE)
             parsed = regex.search(data[key]).groupdict()
-            if any((v is not None for v in parsed.values())):
+            if any((parsed[k] is not None for k in dim_order)):
+                if parsed['dim_label_0'] is not None:
+                    parsed.update(
+                        {hwd[parsed[f'dim_label_{i}'].lower()]: parsed[dim_order[i]]
+                        for i in range(3)}
+                    )
                 data['height'] = cast_float(parsed['height'])
                 data['width'] = cast_float(parsed['width'])
                 data['depth'] = cast_float(parsed['depth'])
