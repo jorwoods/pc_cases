@@ -65,7 +65,7 @@ class NeweggSpider(scrapy.Spider):
             if any((parsed[k] is not None for k in dim_order)):
                 if parsed['dim_label_0'] is not None:
                     parsed.update(
-                        {hwd[parsed[f'dim_label_{i}'].lower()]: parsed[dim_order[i]]
+                        {hwd[parsed[f'dim_label_{i}'].lower()[1]]: parsed[dim_order[i]]
                         for i in range(3)}
                     )
                 data['height'] = cast_float(parsed['height'])
