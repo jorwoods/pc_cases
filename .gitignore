@@ -1,5 +1,6 @@
 # IDE files
 .vscode/
+.history/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -132,3 +133,6 @@ dmypy.json
 .pyre/
 
 *.html
+
+# Terraform temp files
+.terraform/

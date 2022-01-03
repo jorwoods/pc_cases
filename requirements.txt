@@ -1,0 +1,4 @@
+scrapy
+pandas
+ipython
+scrapy-rotating-proxies
