@@ -1,17 +1,9 @@
 import scrapy
 import re
-from scrapy.exceptions import CloseSpider
 
 HTML_TAGS = re.compile("<.*?>")
 base_url = 'https://www.newegg.com/p/pl?N=100007583%20601310882&page={}'
-dimension_order = re.compile(r"\(([hwld])\s*x\s*([hwld])\s*x\s*([hwld])")
-hwd = {'h': 'height', 'w':'width', 'd':'depth', 'l': 'depth'}
 
-def cast_float(x):
-    if x is None:
-        return None
-    else:
-        return float(x)
 
 class NeweggSpider(scrapy.Spider):
     name = 'newegg'
@@ -36,44 +28,7 @@ class NeweggSpider(scrapy.Spider):
             data[extract_with_css(row, "th").lower()] = extract_with_css(row, "td")
 
         data['price'] = extract_with_css(response, "div.product-pane ul.price li.price-current strong")
-        data['name'] = extract_with_css(response, "head title")
+        data['name'] = title
         data["url"] = response.url
-        
-        for key in data.keys():
-            if not key.startswith("dimension"):
-                continue
-            order = dimension_order.findall(key)
-            if order:
-                dim_order = [hwd[i] for i in order[0]]
-            else:
-                dim_order = ['height', 'width', 'depth']
-
-            regex = re.compile(r"""
-                (?P<{0}>[\d\.]+)
-                \s*("|mm)?\s*([x\*])\s*
-                \s*(?P<dim_label_0>\([LWHD]\))?
-                (?P<{1}>[\d\.]+)
-                \s*("|mm)?\s*([x\*])\s*
-                \s*(?P<dim_label_1>\([LWHD]\))?
-                (?P<{2}>[\d\.]+)
-                \s*(?P<dim_label_2>\([LWHD]\))?
-                \s*
-                (?P<unit>mm|in|")?
-                |$ # Regex capture no matches so groupdict doesn't error.
-            """.format(*dim_order), re.VERBOSE | re.IGNORECASE)
-            parsed = regex.search(data[key]).groupdict()
-            if any((parsed[k] is not None for k in dim_order)):
-                if parsed['dim_label_0'] is not None:
-                    parsed.update(
-                        {hwd[parsed[f'dim_label_{i}'].lower()[1]]: parsed[dim_order[i]]
-                        for i in range(3)}
-                    )
-                data['height'] = cast_float(parsed['height'])
-                data['width'] = cast_float(parsed['width'])
-                data['depth'] = cast_float(parsed['depth'])
-                data['units'] = parsed['unit']
-                if data['units'] == '"':
-                    data['units'] == 'in'
-                break
 
         yield data

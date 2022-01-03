@@ -10,14 +10,6 @@ class MicrocenterSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        try:
-            page_num = re.findall(r"page=(\d+)", response.url)[0]
-        except IndexError:
-            page_num = "1"
-        filename = f"microcenter-cases-{page_num}.html"
-        with open(filename, "wb") as f:
-            f.write(response.body)
-
         cases = response.css("li.product_wrapper div.result_left a.image::attr(href)")
         yield from response.follow_all(cases, self.parse_case)
 
