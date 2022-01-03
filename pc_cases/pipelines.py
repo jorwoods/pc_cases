@@ -9,9 +9,6 @@ from typing import Dict
 from itemadapter import ItemAdapter
 import re
 
-measurement = re.compile(r"(?P<size>[\d\.]+)\s*(?P<unit>in|mm)?|$")
-dimension_order = re.compile(r"\(([hwld])\s*x\s*([hwld])\s*x\s*([hwld])")
-hwd = {'h': 'height', 'w':'width', 'd':'depth', 'l': 'depth'}
 
 def cast_float(x):
     if x is None:
@@ -29,6 +26,8 @@ class PcCasesPipeline:
 
     def parse_dimensions(self, page_specs: Dict[str, str]) -> Dict[str, str]:
         data = {}
+        dimension_order = re.compile(r"\(([hwld])\s*x\s*([hwld])\s*x\s*([hwld])")
+        hwd = {'h': 'height', 'w':'width', 'd':'depth', 'l': 'depth'}
         for key in page_specs.keys():
             if not key.startswith("dimension"):
                 continue
@@ -69,6 +68,7 @@ class PcCasesPipeline:
                 return data
 
     def parse_gpu(self, page_specs: Dict[str, str]) -> Dict[str, float]:
+        measurement = re.compile(r'(?P<size>[\d\.]+)\s*(?P<unit>in|mm|")?|$')
         gpu = {}
         for key in page_specs:
             if not any(x in key for x in ('gpu', 'video', 'gfx')):
@@ -78,7 +78,7 @@ class PcCasesPipeline:
                 continue
             size = cast_float(gpu_info['size'])
             multiple = 1
-            if gpu_info['unit'] == 'in' or size < 30:
+            if gpu_info['unit'].lower() in ('in', '"') or size < 30:
                 multiple = 25.4
             
             gpu['max_gpu_length'] = size * multiple
