@@ -12,3 +12,11 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
 COPY . .
 
 RUN pip install -r requirements.txt
+
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz
+
+# Install firefox, geckodriver and put it on path
+RUN apt install firefox --yes && \
+    tar -xvzf geckodriver* && \
+    chmod +x geckodriver && \
+    mv geckodriver /usr/local/bin/

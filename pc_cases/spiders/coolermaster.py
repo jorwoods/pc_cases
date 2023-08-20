@@ -6,7 +6,7 @@ HTML_TAGS = re.compile("<.*?>")
 
 class CoolermasterSpider(scrapy.Spider):
     name = 'coolermaster'
-    allowed_domains = ['https://www.coolermaster.com']
+    allowed_domains = ['coolermaster.com']
     start_urls = ['https://www.coolermaster.com/catalog/cases/?filter=8448/#!/Size=Mid%20Tower']
 
     def parse(self, response):

@@ -7,6 +7,7 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 from pathlib import Path
+from shutil import which
 project = Path(__file__).parents[1]
 
 
@@ -15,6 +16,9 @@ BOT_NAME = 'pc_cases'
 SPIDER_MODULES = ['pc_cases.spiders']
 NEWSPIDER_MODULE = 'pc_cases.spiders'
 ROTATING_PROXY_LIST_PATH = str(project / "proxy_ips.txt")
+SELENIUM_DRIVER_NAME = "firefox"
+SELENIUM_DRIVER_EXECUTABLE_PATH = which("geckodriver")
+SELENIUM_DRIVER_ARGUMENTS = ["-headless"]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'pc_cases (+http://www.yourdomain.com)'
