@@ -32,9 +32,8 @@ class MicrocenterSpider(scrapy.Spider):
         def remove_divs(s):
             return ' '.join(divs.findall(s))
         
-        data = response.css("div.spec-body div").getall()
-        data = [remove_divs(d) for d in data]
-        data = dict(zip(data[::2], data[1::2]))
+        cleaned = (remove_divs(d) for d in response.css("div.spec-body div").getall())
+        data = dict(zip(cleaned, cleaned))
 
         data['price'] = extract_with_css("div#options-pricing span#pricing::attr(content)")
         data['name'] = extract_with_css("title::text")
